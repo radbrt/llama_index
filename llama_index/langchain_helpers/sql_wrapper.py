@@ -1,9 +1,10 @@
 """SQL wrapper around SQLDatabase in langchain."""
-from typing import Any, Dict, List, Tuple, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
-from llama_index.bridge.langchain import SQLDatabase as LangchainSQLDatabase
 from sqlalchemy import MetaData, create_engine, insert, text
 from sqlalchemy.engine import Engine
+
+from llama_index.bridge.langchain import SQLDatabase as LangchainSQLDatabase
 
 
 class SQLDatabase(LangchainSQLDatabase):
@@ -50,7 +51,10 @@ class SQLDatabase(LangchainSQLDatabase):
         )
         columns = []
         for column in self._inspector.get_columns(table_name):
-            columns.append(f"{column['name']} ({str(column['type'])})")
+            if column.get('comment'):
+                columns.append(f"{column['name']} ({str(column['type'])}): {column['comment']}")
+            else:
+                columns.append(f"{column['name']} ({str(column['type'])})")
         column_str = ", ".join(columns)
         foreign_keys = []
         for foreign_key in self._inspector.get_foreign_keys(table_name):
