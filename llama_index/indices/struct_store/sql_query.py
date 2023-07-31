@@ -322,10 +322,12 @@ class NLSQLTableQueryEngine(BaseSQLTableQueryEngine):
         response_synthesis_prompt: Optional[Prompt] = None,
         tables: Optional[Union[List[str], List[Table]]] = None,
         service_context: Optional[ServiceContext] = None,
+        include_comments: bool = False,
         **kwargs: Any,
     ) -> None:
         """Initialize params."""
         self._tables = tables
+        self.include_comments = include_comments
         super().__init__(
             sql_database,
             text_to_sql_prompt=text_to_sql_prompt,
@@ -351,7 +353,9 @@ class NLSQLTableQueryEngine(BaseSQLTableQueryEngine):
                     table_str = table
                 else:
                     raise ValueError(f"Unknown table type: {table}")
-                table_info = self._sql_database.get_single_table_info(table_str)
+                table_info = self._sql_database.get_single_table_info(
+                    table_str, self.include_comments
+                )
 
                 if self._context_query_kwargs.get(table_str, None) is not None:
                     table_opt_context = " The table description is: "
@@ -364,7 +368,9 @@ class NLSQLTableQueryEngine(BaseSQLTableQueryEngine):
             # get all tables
             table_names = self._sql_database.get_usable_table_names()
             for table_name in table_names:
-                table_info = self._sql_database.get_single_table_info(table_name)
+                table_info = self._sql_database.get_single_table_info(
+                    table_name, self.include_comments
+                )
 
                 if self._context_query_kwargs.get(table_name, None) is not None:
                     table_opt_context = " The table description is: "
