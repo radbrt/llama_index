@@ -41,7 +41,7 @@ class SQLDatabase(LangchainSQLDatabase):
         """Get table columns."""
         return self._inspector.get_columns(table_name)
 
-    def get_single_table_info(self, table_name: str, include_comments = False) -> str:
+    def get_single_table_info(self, table_name: str) -> str:
         """Get table info for a single table."""
         # same logic as table_info, but with specific table names
         template = (
@@ -50,11 +50,15 @@ class SQLDatabase(LangchainSQLDatabase):
         )
         columns = []
         for column in self._inspector.get_columns(table_name):
-            if include_comments and column.get('comment'):
-                columns.append(f"{column['name']} ({str(column['type'])}): {column.get('comment')}")
+            if column.get("comment"):
+                columns.append(
+                    f"{column['name']} ({str(column['type'])}): {column.get('comment')}"
+                )
             else:
                 columns.append(f"{column['name']} ({str(column['type'])})")
-            columns.append(f"{column['name']} ({str(column['type'])}): {column.get('comment')}")
+            columns.append(
+                f"{column['name']} ({str(column['type'])}): {column.get('comment')}"
+            )
         column_str = ", ".join(columns)
         foreign_keys = []
         for foreign_key in self._inspector.get_foreign_keys(table_name):
